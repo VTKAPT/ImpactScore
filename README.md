@@ -1,1 +1,1 @@
-Impact Score calculators
+Impact Score calculator
