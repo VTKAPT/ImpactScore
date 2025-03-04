@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impact Score Calculators</title>
+    <title>Impact Score Calculator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -48,7 +48,11 @@
             font-size: 16px;
             cursor: pointer;
         }
-        button:hover {
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
             background-color: #e69500;
         }
         .result {
@@ -70,6 +74,7 @@
         <div class="form-group">
             <label for="manualWorkaround">Manual Workaround (Yes/No):</label>
             <select id="manualWorkaround" required>
+                <option value="">Select</option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
             </select>
@@ -78,13 +83,13 @@
         <!-- Frequency (weekly) -->
         <div class="form-group">
             <label for="frequency">Frequency (weekly):</label>
-            <input type="number" id="frequency" min="0" required>
+            <input type="number" id="frequency" min="1" required>
         </div>
         
         <!-- AHT (mins) -->
         <div class="form-group">
             <label for="aht">AHT (mins):</label>
-            <input type="number" id="aht" min="0" required>
+            <input type="number" id="aht" min="1" required>
         </div>
         
         <!-- Annual Lost Revenue / Write Offs -->
@@ -97,72 +102,82 @@
         <div class="form-group">
             <label for="risk">Significant Reputational or Regulatory Risk (Yes/No):</label>
             <select id="risk" required>
+                <option value="">Select</option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
             </select>
         </div>
 
         <!-- Calculated Fields at the Bottom -->
-        <!-- Weekly Impact (auto-calculated) -->
         <div class="form-group">
             <label for="weeklyImpact">Weekly Impact (mins):</label>
             <input type="number" id="weeklyImpact" readonly>
         </div>
         
-        <!-- Annual Cost (auto-calculated) -->
         <div class="form-group">
             <label for="annualCost">Annual Cost ($):</label>
             <input type="number" id="annualCost" readonly>
         </div>
         
-        <!-- TOTAL ANNUAL LOSS (auto-calculated) -->
         <div class="form-group">
             <label for="totalAnnualLoss">TOTAL ANNUAL LOSS:</label>
             <input type="number" id="totalAnnualLoss" readonly>
         </div>
         
-        <!-- Impact Score (auto-calculated) -->
         <div class="form-group">
             <label for="impactScore">Impact Score:</label>
             <input type="number" id="impactScore" readonly>
         </div>
 
-        <button type="button" onclick="calculateImpact()">Calculate Impact</button>
+        <button type="button" id="calculateButton" onclick="calculateImpact()" disabled>Calculate Impact</button>
     </form>
 
     <div class="result" id="result"></div>
 </div>
 
 <script>
+    function validateForm() {
+        const manualWorkaround = document.getElementById('manualWorkaround').value;
+        const frequency = document.getElementById('frequency').value;
+        const aht = document.getElementById('aht').value;
+        const lostRevenue = document.getElementById('lostRevenue').value;
+        const risk = document.getElementById('risk').value;
+
+        const isValid = manualWorkaround && frequency && aht && lostRevenue && risk;
+        document.getElementById('calculateButton').disabled = !isValid;
+    }
+
     function calculateImpact() {
-        // Retrieve input values
         const frequency = parseFloat(document.getElementById('frequency').value);
         const aht = parseFloat(document.getElementById('aht').value);
         const lostRevenue = parseFloat(document.getElementById('lostRevenue').value);
         const risk = document.getElementById('risk').value;
 
-        // Hardcoded cost per minute based on 1 FTE earning AUD 70,000 annually
-        const costPerMinute = 0.6525; // AUD
+        const costPerMinute = 0.6525; 
 
-        // Calculate Weekly Impact (Frequency x AHT)
         const weeklyImpact = frequency * aht;
         document.getElementById('weeklyImpact').value = weeklyImpact;
 
-        // Calculate Annual Cost based on Weekly Impact and Cost Per Minute
         const annualCost = weeklyImpact * costPerMinute * 52;
         document.getElementById('annualCost').value = annualCost.toFixed(2);
 
-        // Calculate TOTAL ANNUAL LOSS (Annual Cost + Lost Revenue)
         const totalAnnualLoss = annualCost + lostRevenue;
         document.getElementById('totalAnnualLoss').value = totalAnnualLoss.toFixed(2);
 
-        // Impact Score Calculation using provided formula
         const impactScore = (weeklyImpact / 100) + (annualCost / 1000) + (lostRevenue / 1000) + (risk === "Yes" ? 10 : 0);
 
-        // Display the calculated impact score
         document.getElementById('impactScore').value = impactScore.toFixed(2);
         document.getElementById('result').innerText = "Impact Score: " + impactScore.toFixed(2);
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const inputs = ['manualWorkaround', 'frequency', 'aht', 'lostRevenue', 'risk'];
+        inputs.forEach(id => {
+            document.getElementById(id).addEventListener('input', validateForm);
+            document.getElementById(id).addEventListener('change', validateForm);
+        });
+        validateForm();
+    });
 </script>
 
 </body>
