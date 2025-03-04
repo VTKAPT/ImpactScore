@@ -30,6 +30,11 @@
             font-weight: bold;
             color: #2C3483;
         }
+        label.required::after {
+            content: " *";
+            color: red;
+            font-weight: bold;
+        }
         input[type="number"], select {
             width: 100%;
             padding: 8px;
@@ -37,6 +42,10 @@
             margin-bottom: 10px;
             border: 1px solid #2C3483;
             border-radius: 5px;
+        }
+        .error {
+            border: 2px solid red !important;
+            background-color: #ffe6e6;
         }
         button {
             width: 100%;
@@ -72,7 +81,7 @@
         
         <!-- Manual Workaround -->
         <div class="form-group">
-            <label for="manualWorkaround">Manual Workaround (Yes/No):</label>
+            <label for="manualWorkaround" class="required">Manual Workaround (Yes/No):</label>
             <select id="manualWorkaround" required>
                 <option value="">Select</option>
                 <option value="Yes">Yes</option>
@@ -82,25 +91,25 @@
         
         <!-- Frequency (weekly) -->
         <div class="form-group">
-            <label for="frequency">Frequency (weekly):</label>
+            <label for="frequency" class="required">Frequency (weekly):</label>
             <input type="number" id="frequency" min="1" required>
         </div>
         
         <!-- AHT (mins) -->
         <div class="form-group">
-            <label for="aht">AHT (mins):</label>
+            <label for="aht" class="required">AHT (mins):</label>
             <input type="number" id="aht" min="1" required>
         </div>
         
         <!-- Annual Lost Revenue / Write Offs -->
         <div class="form-group">
-            <label for="lostRevenue">Annual Lost Revenue / Write Offs:</label>
+            <label for="lostRevenue" class="required">Annual Lost Revenue / Write Offs:</label>
             <input type="number" id="lostRevenue" min="0" required>
         </div>
 
         <!-- Significant Reputational or Regulatory Risk -->
         <div class="form-group">
-            <label for="risk">Significant Reputational or Regulatory Risk (Yes/No):</label>
+            <label for="risk" class="required">Significant Reputational or Regulatory Risk (Yes/No):</label>
             <select id="risk" required>
                 <option value="">Select</option>
                 <option value="Yes">Yes</option>
@@ -108,7 +117,7 @@
             </select>
         </div>
 
-        <!-- Calculated Fields at the Bottom -->
+        <!-- Calculated Fields -->
         <div class="form-group">
             <label for="weeklyImpact">Weekly Impact (mins):</label>
             <input type="number" id="weeklyImpact" readonly>
@@ -137,13 +146,19 @@
 
 <script>
     function validateForm() {
-        const manualWorkaround = document.getElementById('manualWorkaround').value;
-        const frequency = document.getElementById('frequency').value;
-        const aht = document.getElementById('aht').value;
-        const lostRevenue = document.getElementById('lostRevenue').value;
-        const risk = document.getElementById('risk').value;
+        const requiredFields = ['manualWorkaround', 'frequency', 'aht', 'lostRevenue', 'risk'];
+        let isValid = true;
 
-        const isValid = manualWorkaround && frequency && aht && lostRevenue && risk;
+        requiredFields.forEach(id => {
+            const input = document.getElementById(id);
+            if (!input.value) {
+                input.classList.add("error");
+                isValid = false;
+            } else {
+                input.classList.remove("error");
+            }
+        });
+
         document.getElementById('calculateButton').disabled = !isValid;
     }
 
